@@ -1,0 +1,3 @@
+is_debug = false
+target_os = "android"
+target_cpu = "arm64"
