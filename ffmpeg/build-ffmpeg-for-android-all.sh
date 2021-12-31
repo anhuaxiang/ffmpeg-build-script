@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-NDK=$ANDROID_NDK
+NDK=/Users/yanrujing/Library/Android/sdk/ndk/android-ndk-r14b
 BUILD_PLATFORM=darwin
 #BUILD_PLATFORM=linux
 API_LEVEL=21
@@ -99,10 +99,8 @@ cd ../ffmpeg-hardcode
 --disable-podpages \
 --disable-txtpages \
 --disable-shared \
---disable-postproc \
 --disable-indevs \
 --disable-outdevs \
---disable-devices \
 --disable-ffprobe \
 --disable-ffplay \
 --disable-ffmpeg \
@@ -113,14 +111,17 @@ cd ../ffmpeg-hardcode
 --disable-version3 \
 --disable-nonfree \
 --disable-network \
+--enable-postproc \
 --enable-libfdk_aac \
 --enable-encoder=libfdk_aac \
 --enable-jni \
 --enable-mediacodec \
+--enable-hlmediacodec \
 --enable-decoder=h264_mediacodec \
---enable-decoder=hevc_mediacodec \
---enable-decoder=mpeg4_mediacodec \
+--enable-decoder=h264_hlmediacodec \
 --enable-encoder=h264_mediacodec \
+--enable-encoder=h264_hlmediacodec \
+--disable-encoder=hevc_hlmediacodec \
 --enable-libx264 \
 --enable-encoder=libx264 \
 --extra-cflags="-O3 -finline-limit=1000 -fPIC -DANDROID -DHILIVE_SYS_ANDROID -DHILIVE_DEBUG $ADDI_CFLAGS -I$FDK_INC -I$X264_INC" \
@@ -160,6 +161,7 @@ ${CROSS_COMPILE}ld -rpath-link=$SYSROOT/usr/lib -L$SYSROOT/usr/lib -L$PREFIX/lib
     $FFMPEG_LIB/libavformat.a \
     $FFMPEG_LIB/libavfilter.a \
     $FFMPEG_LIB/libavutil.a \
+    $FFMPEG_LIB/libavdevice.a \
     -lc -lm -lz -ldl -llog -lmediandk --dynamic-linker=/system/bin/linker $TOOLCHAIN/lib/gcc/$HOST/4.9.x/libgcc.a
 
 }
@@ -188,38 +190,18 @@ build_ffmpeg
 merge_lib
 }
 
-#add for wexin dec_build_android.sh
-SYSROOT=$NDK/platforms/$AOSP_API/arch-arm
-TOOLCHAIN=$NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/$BUILD_PLATFORM-x86_64
-HOST=arm-linux-androideabi
-CROSS_PREFIX_BUILD_TOOL_PATH=$HOST-
-ARCH=arm
-CPU=arm
-ADDI_CFLAGS="-marm"
-#build_one
 
-#arm
-SYSROOT=$NDK/platforms/$AOSP_API/arch-arm
-TOOLCHAIN=$NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/$BUILD_PLATFORM-x86_64
-HOST=arm-linux-androideabi
-CROSS_PREFIX_BUILD_TOOL_PATH=$HOST-
-ARCH=arm
-CPU=armv5te
-ADDI_CFLAGS="-marm -fPIC"
-ADDITIONAL_CONFIGURE_FLAG="--disable-neon --enable-armv5te --disable-armv6 --disable-armv6t2 --disable-vfp"
+##armv7-neon
+#SYSROOT=$NDK/platforms/$AOSP_API/arch-arm
+#TOOLCHAIN=$NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/$BUILD_PLATFORM-x86_64
+#HOST=arm-linux-androideabi
+#CROSS_PREFIX_BUILD_TOOL_PATH=$HOST-
+#ARCH=arm
+#CPU=armv7-neon
+#ADDI_CFLAGS="-mfloat-abi=softfp -mfpu=neon -marm -march=armv7-a"
+#ADDI_LDFLAGS="-Wl,--fix-cortex-a8"
+#ADDITIONAL_CONFIGURE_FLAG="--enable-neon --enable-armv5te --enable-armv6 --enable-armv6t2 --enable-vfp"
 #build_one
-
-#armv7-neon
-SYSROOT=$NDK/platforms/$AOSP_API/arch-arm
-TOOLCHAIN=$NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/$BUILD_PLATFORM-x86_64
-HOST=arm-linux-androideabi
-CROSS_PREFIX_BUILD_TOOL_PATH=$HOST-
-ARCH=arm
-CPU=armv7-neon
-ADDI_CFLAGS="-mfloat-abi=softfp -mfpu=neon -marm -march=armv7-a"
-ADDI_LDFLAGS="-Wl,--fix-cortex-a8"
-ADDITIONAL_CONFIGURE_FLAG="--enable-neon --enable-armv5te --enable-armv6 --enable-armv6t2 --enable-vfp"
-build_one
 
 #arm64-v8a
 SYSROOT=$NDK/platforms/$AOSP_API/arch-arm64
@@ -233,29 +215,4 @@ ADDI_LDFLAGS=""
 ADDITIONAL_CONFIGURE_FLAG="--enable-vfp"
 build_one
 
-#x86
-FFMPEG_ASM_FLAGS="--disable-asm"
-SYSROOT=$NDK/platforms/$AOSP_API/arch-x86
-TOOLCHAIN=$NDK/toolchains/x86-4.9/prebuilt/$BUILD_PLATFORM-x86_64
-HOST=i686-linux-android
-CROSS_PREFIX_BUILD_TOOL_PATH=$HOST-
-ARCH=x86
-CPU=x86
-ADDI_CFLAGS="-march=i686 -mtune=intel -mssse3 -mfpmath=sse -m32"
-ADDI_LDFLAGS="-Wl,--fix-cortex-a8"
-ADDITIONAL_CONFIGURE_FLAG="--enable-vfp"
-#build_one
-
-
-#x86_64
-SYSROOT=$NDK/platforms/$AOSP_API/arch-x86_64
-TOOLCHAIN=$NDK/toolchains/x86_64-4.9/prebuilt/$BUILD_PLATFORM-x86_64
-HOST=x86_64-linux-android
-CROSS_PREFIX_BUILD_TOOL_PATH=$HOST-
-ARCH=x86_64
-CPU=x86_64
-ADDI_CFLAGS="-march=x86-64 -msse4.2 -mpopcnt -m64 -mtune=intel"
-ADDI_LDFLAGS="-Wl,--fix-cortex-a8"
-ADDITIONAL_CONFIGURE_FLAG="--enable-vfp"
-#build_one
 
